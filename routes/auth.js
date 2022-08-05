@@ -15,7 +15,8 @@ passport.use(new GoogleStrategy({
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
         callbackURL: "https://rapidsmm.herokuapp.com/api/auth/google_callback",
-        passReqToCallback: true
+        passReqToCallback: true,
+        scope: ['profile', 'email']
     },
     async(request, accessToken, refreshToken, profile, done) => {
         try {
