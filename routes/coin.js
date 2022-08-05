@@ -18,7 +18,7 @@ router.get("/callback/", async(req, res) => {
         'code': code,
         'client_id': process.env.COINBASE_CLIENT_ID,
         'client_secret': process.env.COINBASE_SECRET_ID,
-        'redirect_uri': 'http://localhost:3700/api/coin/callback'
+        'redirect_uri': 'https://rapidsmm.herokuapp.com/api/coin/callback'
     });
     const config = {
         method: 'post',
