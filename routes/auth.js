@@ -142,7 +142,7 @@ router.get("/confirm/:id", async(req, res) => {
 
 });
 
-router.get("/google",
+router.get("/auth/google",
     passport.authenticate("google", { scope: ['profile', 'email'] })
 );
 
