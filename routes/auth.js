@@ -14,7 +14,7 @@ dotenv.config();
 passport.use(new GoogleStrategy({
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        callbackURL: "http://localhost:3700/api/auth/google_callback",
+        callbackURL: "https://rapidsmm.herokuapp.com/api/auth/google_callback",
         passReqToCallback: true
     },
     async(request, accessToken, refreshToken, profile, done) => {
@@ -78,7 +78,13 @@ router.post("/register",
         })
         try {
             const savedUser = await newUser.save();
-
+            //Create New Wallet
+            const findUser = await User.findOne({ email: email });
+            const newWallet = new Wallet({
+                user: findUser.id,
+                total_amount: 0
+            });
+            const savedWallet = await newWallet.save();
             res.status(201).json(savedUser);
         } catch (err) {
             res.status(500).json(err);
