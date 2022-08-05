@@ -62,6 +62,6 @@ app.use('/api/order', orderRoute);
 
 /********************** */
 //To make express connect as a server and listen to a particular port
-app.listen(process.env.URL_PORT, () => {
+app.listen(process.env.URL_PORT, "0.0.0.0", () => {
     console.log(`Back end server is running on PORT ${process.env.URL_PORT}`)
 });
