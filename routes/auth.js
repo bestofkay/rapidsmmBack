@@ -62,7 +62,7 @@ router.post("/register",
         // Finds the validation errors in this request and wraps them in an object with handy functions
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ error: errors.array() });
         }
 
         let username = req.body.username;
@@ -88,7 +88,7 @@ router.post("/register",
             const savedWallet = await newWallet.save();
             res.status(201).json(savedUser);
         } catch (err) {
-            res.status(500).json(err);
+            res.status(500).json({"status":false, "error":err});
         }
 
     });
@@ -100,31 +100,33 @@ router.post("/login",
         // Finds the validation errors in this request and wraps them in an object with handy functions
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ error: errors.array() });
         }
 
         try {
             const findUser = await User.findOne({ email: req.body.email });
+			
             if (!findUser) {
-                res.status(500).json("Invalid login credentials");
+                return res.status(500).json({"status":false, "error":"Invalid login credentials"});
             }
             const hashedPassword = CryptoJS.AES.decrypt(findUser.password, process.env.SECRET_KEY);
             const Originalpassword = hashedPassword.toString(CryptoJS.enc.Utf8);
+			
             if (!findUser.confirm_user) {
-                res.status(500).json("Unverified user");
+               return res.status(500).json({"status":false, "error":"Unverified user"});
             }
             if (Originalpassword !== req.body.password) {
-                res.status(500).json("Invalid login credentials");
+               return res.status(500).json({"status":false, "error":"Invalid login credentials"});
             } else {
                 const accessToken = jwt.sign({ id: findUser.id },
                     process.env.JWT_KEY, { expiresIn: "1d" }
                 );
                 const { password, ...others } = findUser._doc;
-                res.status(200).json({...others, accessToken });
+               return res.status(200).json({...others, accessToken });
             }
 
         } catch (err) {
-            res.status(500).json(err);
+           return res.status(500).json(err);
         }
 
     });

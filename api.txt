@@ -1,0 +1,26 @@
+/api/auth/register : Register new user POST
+Parameters : {
+    "email":"bestofkay@gmail.com",
+    "password":"password",
+    "username":"Kay",
+    "phone":"07030287311"
+}
+
+
+/api/auth/login: Login existing user POST
+Parameters: {
+    "email":"bestofkay@gmail.com",
+    "password":"password",
+}
+
+Register/Login with Google
+/api/auth/google_callback: Login & Register user GET
+
+Register/Login with Coinbase
+/api/coin/callback
+
+To initaiate this call from frontend
+<a href="https://www.coinbase.com/oauth/authorize?response_type=code&client_id=df452cd74d696c2c8c877d194c736924b680dec21e4e66bfb4f54eeda6f5e122&redirect_uri=https://rapidsmm.herokuapp.com/api/coin/callback&scope=wallet:user:read,wallet:user:email,wallet:accounts:read,wallet:transactions:read&account=all"
+        class="btn">
+            Connect with Coinbase
+           </a>
