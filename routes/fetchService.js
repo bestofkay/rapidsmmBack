@@ -197,7 +197,7 @@ router.get("/categories", async(req, res) => {
 		const returnDatas=[];
 		for (const key in categories){let returnData={};
 		console.log(categories[key]);
-			returnData['backURL'] = `http://localhost:3000/product:${categories[key]}`;
+			returnData['backURL'] = `http://localhost:3000/products/${categories[key]}`;
 			returnData['category'] = categories[key];
 			returnDatas.push(returnData)
 		  }
