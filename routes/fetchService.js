@@ -197,7 +197,7 @@ router.get("/categories", async(req, res) => {
 		const returnDatas=[];
 		for (const key in categories){let returnData={};
 		console.log(categories[key]);
-			returnData['backURL'] = `http://localhost:3000/category:${categories[key]}`;
+			returnData['backURL'] = `http://localhost:3000/product:${categories[key]}`;
 			returnData['category'] = categories[key];
 			returnDatas.push(returnData)
 		  }
@@ -234,6 +234,16 @@ router.post("/products/", async(req, res) => {
                 }
             ]
         }).collation({ locale: 'en', strength: 2 });
+        res.status(200).json(products);
+    } catch {
+        res.status(500).json(err);
+    }
+
+});
+
+router.get("/products/:id", async(req, res) => {
+    try {
+        const products = await Service.find({ "category": req.params.id }).collation({ locale: 'en', strength: 2 });
         res.status(200).json(products);
     } catch {
         res.status(500).json(err);
