@@ -190,11 +190,21 @@ router.post("/create", async(req, res) => {
 
 router.get("/categories", async(req, res) => {
     try {
-
+		
+		let pat = 'http://localhost:3000/product:';
         const categories = await Service.distinct("category");
-        res.status(200).json(categories);
+		//console.log(categories);
+		const returnDatas=[];
+		for (const key in categories){let returnData={};
+		console.log(categories[key]);
+			returnData['backURL'] = `http://localhost:3000/category:${categories[key]}`;
+			returnData['category'] = categories[key];
+			returnDatas.push(returnData)
+		  }
+
+        res.status(200).json(returnDatas);
     } catch {
-        res.status(500).json(err);
+        res.status(500).json(err.message);
     }
 
 });

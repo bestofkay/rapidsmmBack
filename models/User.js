@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
     userID: { type: Number },
     token: { type: String },
     is_fraud: { type: Boolean, default: false },
+	is_admin: { type: Boolean, default: false },
     confirm_user: { type: Boolean, default: false },
     confirmation_code: { type: String }
 }, { timestamps: true })
