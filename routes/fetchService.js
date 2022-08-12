@@ -251,7 +251,7 @@ router.post("/products/:id", async(req, res) => {
 
 });
 
-router.post("/products/update", async(req, res) => {
+router.post("/product/update", async(req, res) => {
     try {
 		let serviceID = req.body.key;
         let title = req.body.value.title;
@@ -268,7 +268,7 @@ router.post("/products/update", async(req, res) => {
 });
 
 
-router.post("/products/remove", async(req, res) => {
+router.post("/product/remove", async(req, res) => {
     try {
 		let serviceID = req.body.key;
 		const query = { serviceID: serviceID};
@@ -279,7 +279,5 @@ router.post("/products/remove", async(req, res) => {
     }
 
 });
-
-
 
 module.exports = router;
