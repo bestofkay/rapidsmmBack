@@ -251,6 +251,36 @@ router.get("/products/:id", async(req, res) => {
 
 });
 
+router.post("/products/update", async(req, res) => {
+    try {
+		let serviceID = req.body.serviceID;
+        let title = req.body.title;
+        let listing_price = req.body.listing_price;
+        let maximum = req.body.maximum;
+        let minimum = req.body.minimum;
+		let _id = req.body._id;
+        const updateUser = await Service.findByIdAndUpdate(_id, { $set: { title: title, listing_price: listing_price, maximum: maximum, minimum: minimum } }, { new: true });
+        res.status(200).json({ status: true, result: "Service data updated successfully" });
+    } catch {
+        res.status(500).json(err);
+    }
+
+});
+
+
+router.post("/products/remove", async(req, res) => {
+    try {
+		let serviceID = req.body.serviceID;
+		let _id = req.body._id;
+		const query = { serviceID: serviceID};
+    	const result = await Service.deleteOne(query);
+        res.status(200).json({ status: true, result: "Service deleted successfully" });
+    } catch {
+        res.status(500).json(err);
+    }
+
+});
+
 
 
 module.exports = router;
