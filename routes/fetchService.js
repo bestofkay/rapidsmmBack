@@ -258,7 +258,7 @@ router.post("/product/update", async(req, res) => {
         let listing_price = req.body.value.listing_price;
         let maximum = req.body.value.maximum;
         let minimum = req.body.value.minimum;
-		let _id = req.body.value_id;
+		let _id = req.body.value._id;
         const updateUser = await Service.findByIdAndUpdate(_id, { $set: { title: title, listing_price: listing_price, maximum: maximum, minimum: minimum } }, { new: true });
         res.status(200).json({ status: true, result: "Service data updated successfully" });
     } catch {
