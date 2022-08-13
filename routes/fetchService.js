@@ -20,7 +20,7 @@ router.post("/create", async(req, res) => {
             listingPrice = listingPrice.toFixed(2);
 			properties['category']=null;
 			properties['subcategory']=null;
-            if (listRes.max >= 100 && listRes.min >= 10 & listRes.service != null && listRes.service) {
+            if (listRes.max >= 100 && listRes.min >= 10 && listRes.service != null && listRes.service) {
                 var text = listRes.name;
 				properties['title'] = listRes.name;
 					properties['listing_price'] = listingPrice;
