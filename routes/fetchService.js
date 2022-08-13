@@ -197,14 +197,12 @@ router.post("/create", async(req, res) => {
 
 router.get("/categories", async(req, res) => {
     try {
-		
-		let pat = 'http://localhost:3000/product:';
         const categories = await Service.distinct("category");
 		//console.log(categories);
 		const returnDatas=[];
 		for (const key in categories){let returnData={};
 		console.log(categories[key]);
-			returnData['backURL'] = `http://localhost:3000/products/${categories[key]}`;
+			returnData['backURL'] = `https://sunny-selkie-16449e.netlify.app/products/${categories[key]}`;
 			returnData['category'] = categories[key];
 			returnDatas.push(returnData)
 		  }
