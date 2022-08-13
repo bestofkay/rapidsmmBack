@@ -202,7 +202,7 @@ router.get("/categories", async(req, res) => {
 		const returnDatas=[];
 		for (const key in categories){let returnData={};
 		console.log(categories[key]);
-			returnData['backURL'] = `https://sunny-selkie-16449e.netlify.app/products/${categories[key]}`;
+			returnData['backURL'] = `https://backendrapidsmm.herokuapp.com/products/${categories[key]}`;
 			returnData['category'] = categories[key];
 			returnDatas.push(returnData)
 		  }
