@@ -179,6 +179,10 @@ router.post("/create", async(req, res) => {
             const savedCategory = await Service.insertMany(listProperties);
             await Service.deleteMany({ "category": null });
 
+			const query = { serviceID: null};
+    		const result = await Service.deleteMany(query);
+        res.status(200).json({ status: true, result: "Service deleted successfully" });
+
             res.status(201).json({ status: true, result: savedCategory });
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
