@@ -20,8 +20,14 @@ router.post("/create", async(req, res) => {
             listingPrice = listingPrice.toFixed(2);
 			properties['category']=null;
 			properties['subcategory']=null;
-            if (listRes.max >= 100 && listRes.min >= 10) {
+            if (listRes.max >= 100 && listRes.min >= 10 & listRes.service != null && listRes.service) {
                 var text = listRes.name;
+				properties['title'] = listRes.name;
+					properties['listing_price'] = listingPrice;
+					properties['minimum'] = listRes.min;
+					properties['maximum'] = listRes.max;
+					properties['price'] = listRes.rate;
+					properties['serviceID'] = listRes.service;
 
                 if (text.toLowerCase().includes("instagram")) {
                     properties['category'] = 'Instagram';
@@ -159,13 +165,6 @@ router.post("/create", async(req, res) => {
                     }
                 }
 				if(properties['subcategory'] != null && properties['category'] != null){
-					properties['title'] = listRes.name;
-					properties['listing_price'] = listingPrice;
-					properties['minimum'] = listRes.min;
-					properties['maximum'] = listRes.max;
-					properties['price'] = listRes.rate;
-					properties['serviceID'] = listRes.service;
-	
 					return properties;
 				}
                 
