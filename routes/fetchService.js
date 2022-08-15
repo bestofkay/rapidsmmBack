@@ -246,7 +246,7 @@ router.post("/products/", async(req, res) => {
 
 });
 
-router.post("/products/:id", async(req, res) => {
+router.get("/products/:id", async(req, res) => {
     try {
         const products = await Service.find({ "category": req.params.id }).collation({ locale: 'en', strength: 2 });
         res.status(200).json({result:products, count:products.length});
