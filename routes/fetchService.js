@@ -43,7 +43,7 @@ router.post("/create", async(req, res) => {
                 }
 
 
-                if (text.toLowerCase().includes("Youtube")) {
+                if (text.toLowerCase().includes("youtube")) {
                     properties['category'] = 'Youtube';
                     if (text.toLowerCase().includes("like")) {
                         properties['subcategory'] = 'Likes';
