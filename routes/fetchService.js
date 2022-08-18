@@ -262,7 +262,7 @@ router.post("/product/update", async(req, res) => {
         let minimum = req.body.minimum;
 		let _id = req.body._id;
         const updateUser = await Service.findByIdAndUpdate(_id, { $set: { title: title, listing_price: listing_price, maximum: maximum, minimum: minimum } }, { new: true });
-        res.status(200).json({ status: true, result: updateUser });
+        res.status(200).json({ status: true, result: req.body });
     } catch(err) {
 		console.log(err);
         res.status(500).json(err);
