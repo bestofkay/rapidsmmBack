@@ -256,8 +256,7 @@ router.get("/products/:id", async(req, res) => {
 
 router.post("/product/update", async(req, res) => {
     try {
-		let serviceID = req.serviceID;
-        let title = req.title;
+        let title = req.body.title;
         let listing_price = req.body.listing_price;
         let maximum = req.body.maximum;
         let minimum = req.body.minimum;
