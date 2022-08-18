@@ -206,7 +206,7 @@ router.get("/categories", async(req, res) => {
 		  }
 
         res.status(200).json(returnDatas);
-    } catch {
+    } catch(err) {
         res.status(500).json(err.message);
     }
 
@@ -218,7 +218,7 @@ router.get("/subCategory/:id", async(req, res) => {
         //const user = await Service.find({ confirmation_code: req.params.id });
         const subcategories = await Service.distinct("subcategory", { "category": req.params.id }).collation({ locale: 'en', strength: 2 });
         res.status(200).json(subcategories);
-    } catch {
+    } catch(err) {
         res.status(500).json(err);
     }
 
@@ -238,7 +238,7 @@ router.post("/products/", async(req, res) => {
             ]
         }).collation({ locale: 'en', strength: 2 });
         res.status(200).json(products);
-    } catch {
+    } catch(err) {
         res.status(500).json(err);
     }
 
@@ -248,7 +248,7 @@ router.get("/products/:id", async(req, res) => {
     try {
         const products = await Service.find({ "category": req.params.id }).collation({ locale: 'en', strength: 2 });
         res.status(200).json({result:products, count:products.length});
-    } catch {
+    } catch(err) {
         res.status(500).json(err);
     }
 
@@ -256,19 +256,20 @@ router.get("/products/:id", async(req, res) => {
 
 router.post("/product/update", async(req, res) => {
     try {
-		let serviceID = req.body.serviceID;
-        let title = req.body.title;
+		let serviceID = req.serviceID;
+        let title = req.title;
         let listing_price = req.body.listing_price;
         let maximum = req.body.maximum;
         let minimum = req.body.minimum;
-        const updateUser = await Service.Update({serviceID: serviceID}, { $set: { title: title, listing_price: listing_price, maximum: maximum, minimum: minimum } }, { new: true });
+		let _id = req.body._id;
+        const updateUser = await Service.findByIdAndUpdate(_id, { $set: { title: title, listing_price: listing_price, maximum: maximum, minimum: minimum } }, { new: true });
         res.status(200).json({ status: true, result: "Service data updated successfully" });
-    } catch {
+    } catch(err) {
+		console.log(err);
         res.status(500).json(err);
     }
 
 });
-
 
 router.post("/product/remove", async(req, res) => {
     try {
@@ -276,7 +277,7 @@ router.post("/product/remove", async(req, res) => {
 		const query = { serviceID: serviceID};
     	const result = await Service.deleteOne(query);
         res.status(200).json({ status: true, result: "Service deleted successfully" });
-    } catch {
+    } catch(err) {
         res.status(500).json(err);
     }
 
