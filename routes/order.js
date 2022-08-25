@@ -1,77 +1,70 @@
 const router = require("express").Router();
-const User = require('../models/User');
+const Service = require('../models/Service');
+const Order = require('../models/Order');
 const Wallet = require('../models/Wallet');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
+const WalletTransactions = require('../models/WalletTransactions');
 const dotenv = require("dotenv");
 const axios = require('axios').default;
-const qs = require('qs');
-const crypto = require("crypto");
 dotenv.config();
-var coinbase = require('coinbase-commerce-node');
-var Client = coinbase.Client;
 
-Client.init(process.env.COINBASE_PAYOUT);
-
-let accessToken = "";
-let refreshToken = "";
-
-/*const binancePay = () => {
-
-	try {
-		const body = {
-			name: req.body.title,
-			description: 'RapidSMM',
-			requested_info: 'Customer Email',
-			pricing_type: 'fixed_price',
-			local_price: 'Price in local fiat currency'
+//Create Product Category
+router.post("/purchase", async(req, res) => {
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+		const amount = req.body.amount;
+		const WalletAmount = await Wallet.findOne({"user": req.body._id });
+        if(amount > WalletAmount.total_amount){
+			return res.status(400).json({nessage: 'Insufficient balance'});
 		}
-        const response = await axios.post('https://api.commerce.coinbase.com/checkouts/', body, {
-            headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-				'X-CC-Api-Key': process.env.COINBASE_PAYOUT
-            }
-        });
-        console.log(response.data);
 
-    } catch (e) {
-        res.status(500).json(e);
+		const URL = 'https://smmfollows.com/api/v2';
+		const apiKey = process.env.SMMFOLLOWS;
+		const body = {
+			'key': apiKey,
+			'action': 'add',
+			'service': req.body.serviceID,
+			'link': req.boay.webLink,
+			'quantity': req.body.quantity
+		};
+       // const newRes = response.data;
+	   axios.post(URL, body)
+	  .then(function (response) {
+
+		const newOrder = new Order({
+            user: req.body._id,
+            product: req.body.title,
+            total_amount: amount,
+            order_status: 'Pending',
+            payment_status: 'Completed',
+			reference: response.order
+        })
+        try {
+            await newOrder.save();
+			await Wallet.updateOne( { user: req.body._id },{ $inc: {total_amount: -(amount)}});	
+			return res.status(200).send({message: 'Order completed! Check status of your order'});
+
+        } catch (err) {
+        }
+
+	  })
+	  .catch(function (error) {
+		res.status(500).json(error);
+	  });
+
+});
+
+/************ CLIENT */
+router.post("/history/:id", async(req, res) => {
+	try {
+        const orders = await Order.find({ "user": req.params.id});
+        return res.status(200).json(orders);
+    } catch(err) {
+        return res.status(500).json(err.message);
     }
 
-}*/
-
-
-
-router.get("/retrieve/", async(req, res) => {
-	
-	var Charge = coinbase.resources.Charge;
-
-	Charge.retrieve('H34J7CVX', function (error, response) {
-		console.log(error);
-		console.log(response);
-	  });
-	  
 });
 
+/********* CLIENT */
 
-router.get("/create/", async(req, res) => {
-	var Charge = coinbase.resources.Charge;
-	var checkoutData = {
-		'name': 'The Sovereign Individual',
-		'description': 'Mastering the Transition to the Information Age',
-		'pricing_type': 'fixed_price',
-		'local_price': {
-			'amount': '100.00',
-			'currency': 'USD'
-		},
-		'requested_info': ['name', 'email']
-	};
-	Charge.create(checkoutData, function (error, response) {
-	  console.log(error);
-	  console.log(response);
-	});
 
-});
 
 module.exports = router;

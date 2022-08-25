@@ -9,8 +9,11 @@ const authRoute = require("./routes/auth");
 const fetchRoute = require("./routes/fetchService");
 const coinRoute = require("./routes/coin");
 const orderRoute = require("./routes/order")
+const walletRoute = require("./routes/wallet");
+const productRoute = require("./routes/product");
+const fundRoute = require("./routes/fund");
 const morgan = require("morgan");
-var cron = require('node-cron');
+import cron from './library/cron';
 
 
 //HTTPs REQUESTS
@@ -31,23 +34,7 @@ mongoose
         console.log(err)
     });
 
-/************ */
-
-cron.schedule('* * * * *', () => {
-    Services;
-});
-
-(async() => {
-    try {
-        const response = await axios.get('https://api.coinbase.com/v2/prices/USDT-NGN/spot');
-        let nairaAmount = response.data.data.amount;
-        console.log(nairaAmount);
-    } catch (err) {
-        console.log(err.message); //can be console.error
-    }
-})();
-
-/*************** */
+cron();
 /****************MIDDLEWARE */
 app.use(morgan('tiny'))
     /***************END POINTS */
@@ -59,6 +46,9 @@ app.use('/api/auth', authRoute);
 app.use('/api/fetch', fetchRoute);
 app.use('/api/coin', coinRoute);
 app.use('/api/order', orderRoute);
+app.use('/api/wallet', walletRoute);
+app.use('/api/fund', fundRoute);
+app.use('/api/product', productRoute);
 
 /********************** */
 //To make express connect as a server and listen to a particular port

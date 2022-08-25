@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { generate } = require('mongoose-data-faker'); 
 
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true },
@@ -17,4 +18,5 @@ const userSchema = new mongoose.Schema({
     confirmation_code: { type: String }
 }, { timestamps: true })
 
+generate(userSchema, 50);
 module.exports = mongoose.model("User", userSchema);

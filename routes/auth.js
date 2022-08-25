@@ -8,9 +8,14 @@ const { v4: uuidv4 } = require('uuid');
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const passport = require('passport');
 const dotenv = require("dotenv");
+const { OAuth2Client } = require('google-auth-library')
+
 dotenv.config();
 
+const client = new OAuth2Client(process.env.CLIENT_ID)
+
 //GOOGLE
+
 passport.use(new GoogleStrategy({
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
@@ -36,7 +41,6 @@ passport.use(new GoogleStrategy({
                 const findUser = await User.findOne({ email: profile.emails[0].value });
                 // if user exists return the user 
                 if (findUser) {
-
                     const newWallet = new Wallet({
                         user: findUser.id,
                         total_amount: 0
@@ -52,6 +56,76 @@ passport.use(new GoogleStrategy({
         }
     }
 ));
+
+/*
+router.post("/google", async (req, res) => {
+    const { token }  = req.body
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.CLIENT_ID
+    });
+    const { name, email } = ticket.getPayload();   
+	try {
+		const findUser = await User.findOne({ email: email });
+		// if user exists return the user 
+		if (findUser) {
+			const accessToken = jwt.sign({ id: findUser.id },
+				process.env.JWT_KEY, { expiresIn: "1d" }
+			);
+			const { password, ...others } = findUser._doc;
+            return res.status(200).json({...others, accessToken });
+		}
+		// if user does not exist create a new user 
+		const newUser = new User({
+			username: name,
+			email: email,
+			confirmation_code: uuidv4(),
+			is_fraud: false,
+            confirm_user: true
+		});
+		try {
+			const savedUser = await newUser.save();
+			const findUser = await User.findOne({ email: email });
+			// if user exists return the user 
+			if (findUser) {
+				const newWallet = new Wallet({
+					user: findUser.id,
+					total_amount: 0
+				});
+				const savedWallet = await newWallet.save();
+
+				const accessToken = jwt.sign({ id: findUser.id },
+					process.env.JWT_KEY, { expiresIn: "1d" }
+				);
+				const { password, ...others } = findUser._doc;
+				return res.status(200).json({...others, accessToken});
+				
+			}
+		} catch (err) {
+			return res.status(500).json({"status":false, "error":err});
+		}
+	} catch (error) {
+		return res.status(500).json({"status":false, "error":error});
+	}
+
+});
+*/
+
+router.post("/other_register",
+  
+    async(req, res) => {
+       
+        let id = req.body.id;
+		const findUser = await User.findById(id);
+        // if user exists return the user 
+        if (findUser) {
+            const accessTokens = jwt.sign({ id: findUser.id },
+                process.env.JWT_KEY, { expiresIn: "1d" }
+            );
+            const { password, ...others } = findUser._doc;
+            res.status(200).json({...others, accessTokens });
+        }
+    });
 
 //Register a user
 router.post("/register",
@@ -144,23 +218,17 @@ router.get("/confirm/:id", async(req, res) => {
 
 });
 
+
 router.get("/auth/google",
     passport.authenticate("google", { scope: ['profile', 'email'] })
 );
 
 router.get("/google_callback",
     passport.authenticate("google", { session: false }),
-
     (req, res) => {
-        const accessToken = jwt.sign({ id: req.user.id },
-            process.env.JWT_KEY, { expiresIn: "1d" }
-        );
-        const UserID = req.user;
-        res.status(200).json({ accessToken, UserID });
+		res.redirect('http://exmple.com?id='+req.user.id);
     }
 );
-
-
 
 
 module.exports = router;
