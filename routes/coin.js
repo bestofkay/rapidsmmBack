@@ -40,7 +40,7 @@ router.get("/callback/", async(req, res) => {
         const findUser = await User.findOne({ email: userResult.data.data.email });
         // if user exists return the user 
         if (findUser) {
-            res.redirect('https://rapidsmm.netlify.app/signup?id='+findUser.id);
+            res.redirect(' https://rapidsmm.netlify.app/authorize?token='+findUser.id);
         }
         // if user does not exist create a new user 
         const newUser = new User({
@@ -61,7 +61,7 @@ router.get("/callback/", async(req, res) => {
                     total_amount: 0
                 });
                 const savedWallet = await newWallet.save();
-				res.redirect('https://rapidsmm.netlify.app/signup?id='+findUser.id);
+				res.redirect(' https://rapidsmm.netlify.app/authorize?token='+findUser.id);
             }
         } catch (err) {
             res.status(500).json(err);

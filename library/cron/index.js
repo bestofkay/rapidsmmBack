@@ -20,6 +20,7 @@ const confirmBin = async() => {
 	const listPayments = payments.map(listRes => {
 
 	let reference = listRes.reference;
+	if(reference.length > 1){
 	let userID = listRes.user;
 	 dispatch_request(
 		'POST', 
@@ -50,58 +51,54 @@ const confirmBin = async() => {
 		  }
 	})
 	.catch(error => { console.log(error); });
-	});
+	}
+});
 	return;
 }
 
 const confirmCoin = async() => {
-	
 	var Charge = coinbase.resources.Charge;
-	
 	const value={};
 	const payments = await Payment.find({ payment_status: { $ne: "Completed" }, method: "Coinbase" }).collation({ locale: 'en', strength: 2 });
 
-	const listPayments = payments.map(listRes => {
+		const listPayments = payments.map(listRes => {
 
-	let reference = listRes.reference;
-	let userID = listRes.user;
-	Charge.retrieve(reference, async function (error, response) {
-		if(response['timeline'][0]['status'] == 'NEW') {
-			try {
-				
-					await Payment.updateOne({reference:reference}, { $set: {payment_status:response['timeline'][1]['status']}});
-					if(response['timeline'][2]['status'] == 'COMPLETED') {
-					await Payment.updateOne({reference:reference}, { $set: {payment_status:response['timeline'][2]['status']}});
-					await Wallet.updateOne( { user: req.body._id },{ $inc: { total_amount: response['orderAmount'] }});	
-					const newTrans = new WalletTransactions({
-						user: userID,
-						amount: response['orderAmount'],
-						reference: "Funding Wallet",
-					});
+			let reference = listRes.reference;
+			if(reference.length > 1){
+			let userID = listRes.user;
+			Charge.retrieve(reference, async function (error, response) {
+				if(response['timeline'][0]['status'] == 'NEW') {
 					try {
-						await newTrans.save();
-					} catch (err) {
+						
+							await Payment.updateOne({reference:reference}, { $set: {payment_status:response['timeline'][1]['status']}});
+							if(response['timeline'][2]['status'] == 'COMPLETED') {
+							await Payment.updateOne({reference:reference}, { $set: {payment_status:response['timeline'][2]['status']}});
+							await Wallet.updateOne( { user: req.body._id },{ $inc: { total_amount: response['orderAmount'] }});	
+							const newTrans = new WalletTransactions({
+								user: userID,
+								amount: response['orderAmount'],
+								reference: "Funding Wallet",
+							});
+							try {
+								await newTrans.save();
+							} catch (err) {
+							}
+						}
+					} catch(error) {
+					  console.log(error);  
 					}
-				}
-			} catch(error) {
-			  console.log(error);  
-			}
-		  } else {
-			
-		  }
-	  });	
-});
+				  } else {
+					
+				  }
+			  });	
+		};
+	});
 return;  
 };
 
 
 const confirmNPR = async() => {
-	var Charge = coinbase.resources.Charge;
-	Charge.retrieve('H34J7CVX', function (error, response) {
-		console.log(error);
-		console.log(response);
-	  });
-	  
+	
 };
 
 
