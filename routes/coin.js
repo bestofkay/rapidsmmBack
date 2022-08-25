@@ -40,7 +40,8 @@ router.get("/callback/", async(req, res) => {
         const findUser = await User.findOne({ email: userResult.data.data.email });
         // if user exists return the user 
         if (findUser) {
-            return res.redirect(' https://rapidsmm.netlify.app/authorize?token='+findUser.id);
+            return res.redirect('https://rapidsmm.netlify.app/authorize?token='+findUser.id);
+			//res.status(301).redirect("https://www.google.com")});
         }
         // if user does not exist create a new user 
         const newUser = new User({
