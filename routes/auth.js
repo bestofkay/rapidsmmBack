@@ -226,7 +226,7 @@ router.get("/auth/google",
 router.get("/google_callback",
     passport.authenticate("google", { session: false }),
     (req, res) => {
-		res.redirect('https://rapidsmm.netlify.app/authorize?token='+req.user.id);
+		return res.redirect('https://rapidsmm.netlify.app/authorize?token='+req.user.id);
     }
 );
 
