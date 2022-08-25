@@ -13,7 +13,7 @@ const walletRoute = require("./routes/wallet");
 const productRoute = require("./routes/product");
 const fundRoute = require("./routes/fund");
 const morgan = require("morgan");
-import cron from './library/cron';
+const runCron = require("./library/cron");
 
 
 //HTTPs REQUESTS
@@ -34,7 +34,7 @@ mongoose
         console.log(err)
     });
 
-cron();
+runCron();
 /****************MIDDLEWARE */
 app.use(morgan('tiny'))
     /***************END POINTS */

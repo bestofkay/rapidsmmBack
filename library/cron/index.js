@@ -9,12 +9,11 @@ const crypto = require("crypto");
 dotenv.config();
 var coinbase = require('coinbase-commerce-node');
 var Client = coinbase.Client;
-import cron from 'node-cron';
-import { EVERY_5_MINUTES, EVERY_FIRSTDAY_MONTH } from './scheduleConstants';
+const cron = require("node-cron");
 
 Client.init(process.env.COINBASE_PAYOUT);
 
-const confirmBin = () => {
+const confirmBin = async() => {
 	const value={};
 	const payments = await Payment.find({ payment_status: { $ne: "Completed" }, method: "Binance" }).collation({ locale: 'en', strength: 2 });
 
@@ -22,41 +21,40 @@ const confirmBin = () => {
 
 	let reference = listRes.reference;
 	let userID = listRes.user;
-	dispatch_request(
+	 dispatch_request(
 		'POST', 
 		'/binancepay/openapi/v2/order/query',
 		{
 			"prepayId": reference
 		}
 	  )
-	  .then(response => value = response)
-	  .catch(error => { console.log(error); });
+	  .then(async function(response) {
+		if(response.status == "SUCCESS" ){
+			await Wallet.updateOne( { user: userID },{ $inc: { total_amount: response.orderAmount }});	
+			//Create Wallet Transactions
+			const newTrans = new WalletTransactions({
+				user: req.body._id,
+				amount: response.orderAmount,
+				reference: "Funding Wallet",
+			});
+			try {
+				await newTrans.save();
+				const newStatus = response.status;
+				try {
+				   await Payment.updateOne({reference:reference}, { $set: {payment_status:newStatus}}) 
+			   } catch (err) {
+			   }
 
-	  const newStatus = value.status;
-        try {
-            await Payment.updateOne({reference:reference}, { $set: {payment_status:newStatus}}) 
-        } catch (err) {
-        }
-
-	  if(value.status == "SUCCESS" ){
-		await Wallet.updateOne( { user: userID },{ $inc: { total_amount: value.orderAmount }});	
-		//Create Wallet Transactions
-		const newTrans = new WalletTransactions({
-			user: req.body._id,
-			amount: value.orderAmount,
-			reference: "Funding Wallet",
-		});
-		try {
-			await newTrans.save();
-		} catch (err) {
-		}
-		
-	  }
+			} catch (err) {
+			}
+		  }
+	})
+	.catch(error => { console.log(error); });
 	});
 	return;
 }
 
-const confirmCoin = () => {
+const confirmCoin = async() => {
 	
 	var Charge = coinbase.resources.Charge;
 	
@@ -67,7 +65,7 @@ const confirmCoin = () => {
 
 	let reference = listRes.reference;
 	let userID = listRes.user;
-	Charge.retrieve(reference, function (error, response) {
+	Charge.retrieve(reference, async function (error, response) {
 		if(response['timeline'][0]['status'] == 'NEW') {
 			try {
 				
@@ -97,7 +95,7 @@ return;
 };
 
 
-const confirmNPR = () => {
+const confirmNPR = async() => {
 	var Charge = coinbase.resources.Charge;
 	Charge.retrieve('H34J7CVX', function (error, response) {
 		console.log(error);
@@ -140,7 +138,7 @@ function hash_signature(query_string) {
 	  })
   }
 
-  const confirmOrder = () =>{
+  const confirmOrder = async() =>{
         const orders = await Order.find({ order_status: { $ne: "Completed" } }).collation({ locale: 'en', strength: 2 });
 		const listOrders = orders.map(listRes => {
 		let reference = listRes.reference;
@@ -154,7 +152,7 @@ function hash_signature(query_string) {
 		};
        // const newRes = response.data;
 	   axios.post(URL, body)
-	  .then(function (response) {
+	  .then(async function (response) {
 		const newStatus =response.status;
         try {
             await Order.updateOne({reference:reference}, { $set: {order_status:newStatus}}) 
@@ -170,7 +168,7 @@ function hash_signature(query_string) {
 		return;
   };
 
-  const createProducts = () =>{
+  const createProducts = async () =>{
 
 	try {
         //const response = await axios.get(`https://www.qqtube.com/v1-api?api_key=${process.env.QQTMSS}&action=services`);
@@ -358,9 +356,8 @@ function hash_signature(query_string) {
 
   };
 
-
-export default () => {
-  cron.schedule(EVERY_5_MINUTES, () => {
+const runCron = () => {
+  cron.schedule('*/5 * * * *', () => {
 	confirmOrder();
 	confirmBin();
 	confirmCoin();
@@ -368,8 +365,11 @@ export default () => {
     // We'll do some work here...
   });
 
-  cron.schedule(EVERY_FIRSTDAY_MONTH, () => {
+  cron.schedule('* * 1 * *', () => {
     createProducts();
   });
 
+  
 }
+
+module.exports = runCron;

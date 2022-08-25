@@ -29,7 +29,7 @@ router.post("/coinbase/create/", async(req, res) => {
 			'currency': 'USD'
 		},
 	};
-	Charge.create(checkoutData, function (error, response) {
+	Charge.create(checkoutData, async function(error, response) {
 		if (error) {
             return res.status(400).send({message: error.message});
         } else {
@@ -121,5 +121,5 @@ function random_string() {
 		data: payload
 	  })
   }
-  
+
 module.exports = router;

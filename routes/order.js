@@ -26,8 +26,8 @@ router.post("/purchase", async(req, res) => {
 			'quantity': req.body.quantity
 		};
        // const newRes = response.data;
-	   axios.post(URL, body)
-	  .then(function (response) {
+	   await axios.post(URL, body)
+	  .then(async function(response) {
 
 		const newOrder = new Order({
             user: req.body._id,
@@ -38,7 +38,7 @@ router.post("/purchase", async(req, res) => {
 			reference: response.order
         })
         try {
-            await newOrder.save();
+            const nOrder = await newOrder.save();
 			await Wallet.updateOne( { user: req.body._id },{ $inc: {total_amount: -(amount)}});	
 			return res.status(200).send({message: 'Order completed! Check status of your order'});
 
@@ -60,11 +60,7 @@ router.post("/history/:id", async(req, res) => {
     } catch(err) {
         return res.status(500).json(err.message);
     }
-
 });
 
 /********* CLIENT */
-
-
-
 module.exports = router;
