@@ -57,7 +57,7 @@ passport.use(new GoogleStrategy({
     }
 ));
 
-router.post("/verify_user", async(req, res) => {   
+router.get("/verify_user", async(req, res) => {   
     const authHeader = req.headers.token;
     if (authHeader) {
         const token = authHeader.split(" ")[1];
@@ -66,7 +66,7 @@ router.post("/verify_user", async(req, res) => {
 		else {
 		const findUser = await User.findById(user.id);
 		const { password, ...others } = findUser._doc;
-		
+
         return res.status(200).json({...others});
         }
         });
