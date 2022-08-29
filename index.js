@@ -4,6 +4,9 @@ const mongoose = require("mongoose");
 //DOTENV
 const dotenv = require("dotenv");
 //use userRoutes
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./swagger-output.json')
+
 const userRoute = require("./routes/user");
 const authRoute = require("./routes/auth");
 const fetchRoute = require("./routes/fetchService");
@@ -49,6 +52,7 @@ app.use('/api/order', orderRoute);
 app.use('/api/wallet', walletRoute);
 app.use('/api/fund', fundRoute);
 app.use('/api/product', productRoute);
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 /********************** */
 //To make express connect as a server and listen to a particular port

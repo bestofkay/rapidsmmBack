@@ -3,6 +3,9 @@ const User = require('../models/User');
 const VerifyToken = require("./verifyToken")
 
 router.get("/find/:id", VerifyToken, async(req, res) => {
+	/* #swagger.security = [{
+               "apiKeyAuth": []
+        }] */
     try {
 
         const user = await User.findById(req.params.id);
@@ -32,8 +35,9 @@ router.post("/update", async(req, res) => {
         let profession = req.body.profession;
         let about = req.body.about;
         let timezone = req.body.timezone;
+		let phone = req.body.phone;
         let _id = req.body.id;
-        const updateUser = await User.findByIdAndUpdate(_id, { $set: { fullname: fullname, profession: profession, about: about, timezone: timezone } }, { new: true });
+        const updateUser = await User.findByIdAndUpdate(_id, { $set: { fullname: fullname, profession: profession, about: about, phone:phone, timezone: timezone } }, { new: true });
         res.status(200).json({ status: true, result: "User data updated successfully" });
     } catch {
         res.status(500).json(err);

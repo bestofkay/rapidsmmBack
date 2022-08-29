@@ -13,19 +13,19 @@ dotenv.config();
 var coinbase = require('coinbase-commerce-node');
 var Client = coinbase.Client;
 
-Client.init(process.env.COINBASE_PAYOUT);
-
-let accessToken = "";
-let refreshToken = "";
+let paymentCC = 1;
 
 router.post("/coinbase/create/", async(req, res) => {
+	let amount = req.body.amount;
+	let tType='def';
+	if(paymentCC % 20 == 0 && amount <= 200){Client.init(process.env.COINBASE_PAYOUT)} else{Client.init(process.env.COINBASE_CL); tType='not'};
 	var Charge = coinbase.resources.Charge;
 	var checkoutData = {
 		'name': 'Rapid SMM Wallet Funding',
 		'description': 'Rapid SMM Wallet Funding',
 		'pricing_type': 'fixed_price',
 		'local_price': {
-			'amount': req.body.amount,
+			'amount': amount,
 			'currency': 'USD'
 		},
 	};
@@ -37,11 +37,13 @@ router.post("/coinbase/create/", async(req, res) => {
 				user: req.body._id,
 				method: 'Coinbase',
 				total_amount: amount,
+				tType:tType,
 				payment_status: 'Pending',
 				reference: response.request_id
 			})
 			try {
 				await newPayment.save();
+				paymentCC++;
 				return res.status(200).send(response);
 			} catch (err) {
 			}

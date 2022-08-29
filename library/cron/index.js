@@ -11,8 +11,6 @@ var coinbase = require('coinbase-commerce-node');
 var Client = coinbase.Client;
 const cron = require("node-cron");
 
-Client.init(process.env.COINBASE_PAYOUT);
-
 const confirmBin = async() => {
 	const value={};
 	const payments = await Payment.find({ payment_status: { $ne: "Completed" }, method: "Binance" }).collation({ locale: 'en', strength: 2 });
@@ -65,6 +63,8 @@ const confirmCoin = async() => {
 
 			let reference = listRes.reference;
 			if(reference.length > 1){
+				if(listRes.tType == 'def'){Client.init(process.env.COINBASE_PAYOUT)} else{Client.init(process.env.COINBASE_CL)};
+				var Charge = coinbase.resources.Charge;
 			let userID = listRes.user;
 			Charge.retrieve(reference, async function (error, response) {
 				if(response['timeline'][0]['status'] == 'NEW') {
@@ -95,7 +95,6 @@ const confirmCoin = async() => {
 	});
 return;  
 };
-
 
 const confirmNPR = async() => {
 	
