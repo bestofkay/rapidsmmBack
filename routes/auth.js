@@ -8,11 +8,14 @@ const { v4: uuidv4 } = require('uuid');
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const passport = require('passport');
 const dotenv = require("dotenv");
-const { OAuth2Client } = require('google-auth-library')
+const { OAuth2Client } = require('google-auth-library');
+const sendGridMail = require('@sendgrid/mail');
+const otpGenerator = require('otp-generator')
 
 dotenv.config();
 
-const client = new OAuth2Client(process.env.CLIENT_ID)
+const client = new OAuth2Client(process.env.CLIENT_ID);
+sendGridMail.setApiKey(process.env.SENDGRIDAPIKEY);
 
 //GOOGLE
 
@@ -107,15 +110,19 @@ router.post("/register",
         let email = req.body.email;
         let password = req.body.password;
         let phone = req.body.phone;
+		let code = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false })
 
         const newUser = new User({
             username: username,
             password: CryptoJS.AES.encrypt(password, process.env.SECRET_KEY).toString(),
             email: email,
             phone: phone,
-            confirmation_code: uuidv4()
+            confirmation_code: code,
+			is_fraud: false,
+            confirm_user: true
         })
         try {
+
             const savedUser = await newUser.save();
             //Create New Wallet
             const findUser = await User.findOne({ email: email });
@@ -124,6 +131,16 @@ router.post("/register",
                 total_amount: 0
             });
             const savedWallet = await newWallet.save();
+			const body = `Here is your OTP for confirmation :: ${code}`;
+			const details = {
+			to: email,
+			from: 'bestofkay@gmail.com',
+			subject: 'OTP Confirmation',
+			text: body,
+			html: `<strong>${body}</strong>`,
+			};
+				
+			await sendGridMail.send(details);
             res.status(201).json(savedUser);
         } catch (err) {
             res.status(500).json({"status":false, "error":err});
@@ -169,9 +186,11 @@ router.post("/login",
 
     });
 
-router.get("/confirm/:id", async(req, res) => {
+router.post("/confirm", async(req, res) => {
+	const email = req.body.email;
+	const code = req.body.otp
     try {
-        const user = await User.findOne({ confirmation_code: req.params.id });
+        const user = await User.findOne({email:email, confirmation_code: code });
         const { password, ...others } = user._doc;
         const updateUser = await User.findByIdAndUpdate(others._id, { $set: { confirm_user: true } }, { new: true });
         //res.status(200).json("User Verified");
@@ -179,6 +198,28 @@ router.get("/confirm/:id", async(req, res) => {
     } catch {
         res.status(500).json(err);
     }
+});
+
+router.post("/resend_code", async(req, res) => {
+
+	const email = req.body.email;
+	let code = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false });
+	const findUser = await User.findOne({ email: email });
+
+	const { password, ...others } = findUser._doc;
+    const updateUser = await User.findByIdAndUpdate(others._id, { $set: { confirmation_code: code } }, { new: true });
+
+	const body = `Here is your OTP for confirmation :: ${code}`;
+			const details = {
+			to: email,
+			from: 'bestofkay@gmail.com',
+			subject: 'OTP Confirmation',
+			text: body,
+			html: `<strong>${body}</strong>`,
+			};
+
+	await sendGridMail.send(details);
+    res.status(201).json('Email sent successfully');
 });
 
 router.get("/auth/google",
