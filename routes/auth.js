@@ -166,15 +166,12 @@ router.post("/login",
             }
             const hashedPassword = CryptoJS.AES.decrypt(findUser.password, process.env.SECRET_KEY);
             const Originalpassword = hashedPassword.toString(CryptoJS.enc.Utf8);
-			
-            if (!findUser.confirm_user) {
-               return res.status(500).json({"status":false, "error":"Unverified user"});
-            }
+		
             if (Originalpassword !== req.body.password) {
                return res.status(500).json({"status":false, "error":"Invalid login credentials"});
             } else {
                 const accessToken = jwt.sign({ id: findUser.id },
-                    process.env.JWT_KEY, { expiresIn: "1d" }
+                    process.env.JWT_KEY, { expiresIn: "10d" }
                 );
                 const { password, ...others } = findUser._doc;
                return res.status(200).json({...others, accessToken });

@@ -10,8 +10,7 @@ router.get("/categories", async(req, res) => {
 		//console.log(categories);
 		const returnDatas=[];
 		for (const key in categories){let returnData={};
-		console.log(categories[key]);
-			returnData['backURL'] = `https://backendrapidsmm.herokuapp.com/products/${categories[key]}`;
+			returnData['backURL'] = `products/${categories[key]}`;
 			returnData['category'] = categories[key];
 			returnDatas.push(returnData)
 		  }
